@@ -4,7 +4,7 @@ import MySQLdb
 import time
 from time import gmtime, strftime
 
-
+#test comment
 
 def readWind():
 	weatherStation.write('0R1\r\n')
