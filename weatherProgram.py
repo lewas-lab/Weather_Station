@@ -1,40 +1,60 @@
+# Authors: John Purviance and Debarati Basu
+# Date: 9/11/14
+# LEWAS Lab 
+# Near real time Vaisala Weather Transmitter WXT520 python program 
+
+########
+# pySerial python library
 import serial 
+########
+
+
 import sys
 import MySQLdb
 import time
 from time import gmtime, strftime
 
-#test comment
 
+##########
+# Functions for termial use
+
+# requests an individual line of wind data
 def readWind():
 	weatherStation.write('0R1\r\n')
 	print(weatherStation.readline())
 
+# requests an individual line of Pressure, Temperature and Humidity data
 def readPTH():
 	weatherStation.write('0R2\r\n')
 	print(weatherStation.readline())
 
+# requests an individual line of precipitation data
 def readPrecipitation():
 	weatherStation.write('0R3\r\n')
 	print(weatherStation.readline())
 
+# requests the Supervisor data message
 def selfCheck():
 	weatherStation.write('0R5\r\n')
 	print(weatherStation.readline())
 
+# requests for all the data values to be read
 def readAll():
 	weatherStation.write('0R0\r\n')
 	for line in weatherStation:
 		print(line)
 
+# checks the settings for wind measurment 
 def checkWind():
 	weatherStation.write('0WU\r\n')
 	print(weatherStation.readline())
 
+# checks the settings for pressure, temperature and humidity
 def checkPTH():
 	weatherStation.write('0TU\r\n')
 	print(weatherStation.readline())
 
+# checks the settings for precipitation
 def checkPrecipitation():
 	weatherStation.write('0RU\r\n')
 	print(weatherStation.readline())
