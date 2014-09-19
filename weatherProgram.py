@@ -64,27 +64,38 @@ def checkSelfCheck():
 	weatherStation.write('0SU\r\n')
 	print(weatherStation.readline())
 
+# Puts the data strings into a for that the can be inserted into the database. 
 def parseNormalString(data):
+	
+	# cut off data identifier. 
 	data=data[4:]
+	
+	#fill list with data values
 	listData=data.split(',')
 	index=0
 	dataList=[]
+	
+	#remove units for datatype. the last data value has a slightly longer unit. 
 	for item in listData:
 		index=index+1
 		if index!=len(listData):
 			dataList.append(item[3:-1])
 		else:
 			dataList.append(item[3:-3])
+			
+	# possibly redundant check
 	for char in dataList[0]:
 		if char=='R':
 			dataList=dataList[1:]
 	return dataList
 
+# determines if the data has a missing value, missing values are replaced with '#'
 def checkDataLists(data):
 	for item in data:
 		if '#' in item:
 			readError(data)
 
+# insterts data into the wind data table.
 def windWrite(data):
 	usableData=parseNormalString(data)
 	checkDataLists(usableData)
@@ -124,7 +135,8 @@ def selfCheckWrite(data):
 	sql="INSERT INTO SelfCheck(HeatingTemp, HeatingV, SupplyV, RefV) VALUES ('%s', '%s','%s', '%s')" %(dataList[0], dataList[1], dataList[2], dataList[3])
 	cursor.execute(sql)
 	db.commit()
-
+	
+# Writes the line of bad data to the log along with the time and terminates data collection. 
 def readError(line):
 	log.write('Read error in line: '+line+'\n')
 	log.write('At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
