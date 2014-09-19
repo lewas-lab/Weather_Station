@@ -181,7 +181,7 @@ def resetIntensity():
 				lineNum=lineNum+1
 
 def precipitatonReset(Time):
-	if Time<=time.time():
+	if Time=>time.time():
 		if not resetRain():
 			log.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
 			db.close()
@@ -196,7 +196,7 @@ def precipitatonReset(Time):
 
 #  
 def start():
-	startTime=time.time()+30
+	restTime=time.time()+30
 	stopTime=time.time()+120
 	for line in weatherStation:
 		if time.time()<stopTime:
@@ -217,7 +217,7 @@ def start():
 		else:
 			db.close()
 			sys.exit()
-		startTime=precipitatonReset(startTime)
+		restTime=precipitatonReset(restTime)
 
 ###########
 #Opens the crash_log.log with privilages to appened to it.
