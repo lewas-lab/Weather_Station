@@ -194,7 +194,7 @@ def precipitatonReset(Time):
 	else:
 		return Time
 
-
+#  
 def start():
 	startTime=time.time()+30
 	stopTime=time.time()+120
