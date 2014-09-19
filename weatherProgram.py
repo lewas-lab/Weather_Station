@@ -58,7 +58,8 @@ def checkPTH():
 def checkPrecipitation():
 	weatherStation.write('0RU\r\n')
 	print(weatherStation.readline())
-
+	
+# checks the setting for the supurvisor data
 def checkSelfCheck():
 	weatherStation.write('0SU\r\n')
 	print(weatherStation.readline())
