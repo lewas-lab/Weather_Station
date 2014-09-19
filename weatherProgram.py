@@ -219,6 +219,11 @@ def start():
 			sys.exit()
 		startTime=precipitatonReset(startTime)
 
+###########
+#Opens the crash_log.log with privilages to appened to it.
+#The serical object 'weatherStation' represents the tty connection that data flows two and from. The connection has
+#no parity bits, a data packet byte size of eight bits, one stop bit, baud rate of 19200 baud. Timeout of 12000 is 
+#the duration that the oject tries to read form the tty file.   
 with open("crash_log.log", 'a', buffering=1) as log:
 	weatherStation=serial.Serial('/dev/ttyUSB0')
 	weatherStation.parity=serial.PARITY_NONE
@@ -227,6 +232,7 @@ with open("crash_log.log", 'a', buffering=1) as log:
 	weatherStation.baudrate=19200
 	weatherStation.timeout=12000
 
+	## internal locoal database connection settings. 
 	db=MySQLdb.connect("localhost", "root", "mysql", "LEWAS")
 	cursor=db.cursor()
 
