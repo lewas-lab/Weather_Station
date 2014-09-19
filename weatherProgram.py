@@ -194,14 +194,22 @@ def precipitatonReset(Time):
 	else:
 		return Time
 
-#  
+
 def start():
+	
+	# time to reset the precipitation paramiters
 	restTime=time.time()+30
+	
+	# time to stop collecting data
 	stopTime=time.time()+120
 	for line in weatherStation:
 		if time.time()<stopTime:
+			
+			#cuts off bad starting characters and then rests the beginning of the line to as it should be.
 			index=line.find('R')
 			dataType='0'+line[index:(index+2)]
+			
+			
 			if dataType=="0R1":
 				windWrite(line)
 			elif dataType=="0R2":
@@ -210,6 +218,8 @@ def start():
 				precipitationWrite(line)
 			elif dataType=="0R5":
 				selfCheckWrite(line)
+				
+			#If line is not as it is expected to be then it is a error message from preciptitation rest.
 			else:
 				plog.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
 				db.close()
