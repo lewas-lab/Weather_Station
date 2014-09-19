@@ -103,13 +103,15 @@ def windWrite(data):
 	cursor.execute(sql)
 	db.commit()
 
+# inserts data into the PTH database table.
 def PTMWrite(data):
 	usableData=parseNormalString(data)
 	checkDataLists(usableData)
 	sql="INSERT INTO PTH(Temp, Humidity, Pressure) VALUES ('%s', '%s', '%s')" %(usableData[0],usableData[1],usableData[2])
 	cursor.execute(sql)
 	db.commit()
-
+	
+# inserts precipitation data into the database. 
 def precipitationWrite(data):
 	usableData=parseNormalString(data)
 	checkDataLists(usableData)
@@ -117,17 +119,26 @@ def precipitationWrite(data):
 	cursor.execute(sql)
 	db.commit()
 
+# writes the diagnostic data to the database. 
 def selfCheckWrite(data):
+	
+	# cut off old header
 	data=data[4:]
+	
+	# create a list of the data values
 	listData=data.split(',')
 	index=0
 	dataList=[]
 	for item in listData:
 		index=index+1
+		
+		# remove data units for each value. the last value in the list has a larger unit.
 		if index!=len(listData):
 			dataList.append(item[3:-1])
 		else:
 			dataList.append(item[3:-2])
+			
+	# possible redundant check. 
 	for char in dataList[0]:
 		if char=='R':
 			dataList=dataList[1:]
@@ -143,36 +154,55 @@ def readError(line):
 	db.close()
 	sys.exit()
 
+# restes rain statistics. 
 def resetRain():
+	
+	# sends rest commad
 	weatherStation.write('0XZRU\r\n')
 	lineNum=0
 	lastReads=[]
+	
+	# Looks for the reset achnoledgement. 
 	for line in weatherStation:
 		if lineNum==2:
+			#go throught the last few lines of data, write them to log. 
 			for itme in lastReads:
 				log.write("Responsen from bad rain reset: "+item+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
 			return False
 		else:
 			index=line.find('T')
 			line=line[index:]
+			
+			# good reset
 			if line=='TX,Rain reset\r\n':
 				return True
+				
+			# could not find the device
 			elif line=='TX,Sync/address error\r\n':
 				log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
 				return False
+				
+			# did not reconise the command
 			elif line=='TX,Unknown cmd error\r\n':
 				log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
 				return False
+			
+			#unkown returns. 
 			else:
 				lastReads.append(line)
 				lineNum=lineNum+1
 
-
+# rest rain intensity
 def resetIntensity():
+	
+	# send rest commad
 	weatherStation.write('0XZRI\r\n')
 	lineNum=0
 	lastReads=[]
+	
+	# Looks for the reset achnoledgement. 
 	for line in weatherStation:
+		#go throught the last few lines of data, write them to log. 
 		if lineNum==2:
 			for itme in lastReads:
 				log.write("Responsen from bad rain reset: "+item+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
@@ -180,24 +210,37 @@ def resetIntensity():
 		else:
 			index=line.find('T')
 			line=line[index:]
+			
+			# good reset
 			if line=='TX,Inty reset\r\n':
 				return True
+				
+			# could not find the device
 			elif line=='TX,Sync/address error\r\n':
 				log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
 				return False
+				
+			# did not reconise the command
 			elif line=='TX,Unknown cmd error\r\n':
 				log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
 				return False
+				
+			#unkown returns.
 			else:
 				lastReads.append(line)
 				lineNum=lineNum+1
-
+				
+# determines if it time to rest the rain, does so and then updates to when the rain needs to be rest to. 
 def precipitatonReset(Time):
 	if Time=>time.time():
+		
+		# writes error mesage if reseting of rain statistics fails. 
 		if not resetRain():
 			log.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
 			db.close()
 			sys.exit()
+		
+		# writes erorr message if resting of rain statistics fails. 
 		if not resetIntensity():
 			log.write('Intensity Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
 			db.close()
@@ -239,6 +282,8 @@ def start():
 		else:
 			db.close()
 			sys.exit()
+			
+		# rest the rain statistics depending on time interval
 		restTime=precipitatonReset(restTime)
 
 ###########
