@@ -195,7 +195,7 @@ def precipitatonReset(Time):
 		return Time
 
 #  
-def start():
+def start(weatherStation):
 	startTime=time.time()+30
 	stopTime=time.time()+120
 	for line in weatherStation:
@@ -236,4 +236,4 @@ with open("crash_log.log", 'a', buffering=1) as log:
 	db=MySQLdb.connect("localhost", "root", "mysql", "LEWAS")
 	cursor=db.cursor()
 
-	start()
+	start(weatherStation)
