@@ -20,31 +20,21 @@ import dbtable
 ##########
 # Functions for termial use
 
-# requests an individual line of wind data
-def readWind():
-    weatherStation.write('0R1\r\n')
-    print(weatherStation.readline())
 
-# requests an individual line of Pressure, Temperature and Humidity data
-def readPTH():
-    weatherStation.write('0R2\r\n')
-    print(weatherStation.readline())
+read_codes = { 'wind': '0R1',
+               'PTH': '0R2',
+               'precipitation': '0R3',
+               'selfcheck': '0R5',
+               'all': '0R0'
+               }
 
-# requests an individual line of precipitation data
-def readPrecipitation():
-    weatherStation.write('0R3\r\n')
-    print(weatherStation.readline())
-
-# requests the Supervisor data message
-def selfCheck():
-    weatherStation.write('0R5\r\n')
-    print(weatherStation.readline())
-
-# requests for all the data values to be read
-def readAll():
-    weatherStation.write('0R0\r\n')
-    for line in weatherStation:
-        print(line)
+def read(metric):
+    try:
+        weatherStation.write(read_codes[metric] + "\r\n")
+    except KeyError:
+        throw RunTimeError("{0}: unknown metric")
+    else:
+        return weatherStation.readline() ## or read multiple lines, need logic for that
 
 # checks the settings for wind measurment
 def checkWind():
