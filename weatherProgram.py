@@ -17,7 +17,6 @@ from time import gmtime, strftime
 import data_inserter
 import dbtable
 
-
 ##########
 # Functions for termial use
 
@@ -135,7 +134,7 @@ def start(weatherStation, cursor):
                 inserters[dispatch[dataType]].insert(cursor, line)
                 db.commit()
             except KeyError:
-                plog.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
+                log.write("{0}: Unknown datatype at: {1}\n".format(dataType, strftime("%a, %d %b %Y %H:%M:%S", gmtime()))
                 return
         else:
             return
