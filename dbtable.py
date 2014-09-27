@@ -8,7 +8,7 @@ class DBTable:
         self.fields = fields
 
     def insert(self, cursor, data):
-        sql="INSERT INTO #{table_name}(#{fields}) VALUES (#place_holders)".format(table_name=self.table_name, 
+        sql="INSERT INTO {table_name}({fields}) VALUES ({place_holders})".format(table_name=self.table_name, 
                                                                                   fields=",".join(self.fields),
                                                                                   place_holders=",".join( ["%s"]*length(self.fields) )
                                                                                   )
