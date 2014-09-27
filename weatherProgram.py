@@ -133,7 +133,13 @@ def resetRain():
     weatherStation.write('0XZRU\r\n')
     lineNum=0
     lastReads=[]
-    for line in weatherStation:
+
+    dispatch = { 'TX,Rain reset\r\n': True
+                 'TX,Sync/address error\r\n': False,
+                 'TX,Unknown cmd error\r\n': False
+             }
+
+    for line in weatherStation: ## This loop can be cleaned up more but I need to see the output of the sensor to have a better idea of what needs to happen
         if lineNum==2:
             for itme in lastReads:
                 log.write("Responsen from bad rain reset: "+item+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
@@ -141,15 +147,13 @@ def resetRain():
         else:
             index=line.find('T')
             line=line[index:]
-            if line=='TX,Rain reset\r\n':
+    
+            try:
+                if not dispatch[line]:
+                    log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
+                    return False
                 return True
-            elif line=='TX,Sync/address error\r\n':
-                log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
-                return False
-            elif line=='TX,Unknown cmd error\r\n':
-                log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
-                return False
-            else:
+            except KeyError:
                 lastReads.append(line)
                 lineNum=lineNum+1
 
