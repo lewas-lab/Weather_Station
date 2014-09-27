@@ -136,7 +136,7 @@ def resetRain():
     lineNum=0
     lastReads=[]
 
-    dispatch = { 'TX,Rain reset\r\n': True
+    dispatch = { 'TX,Rain reset\r\n': True,
                  'TX,Sync/address error\r\n': False,
                  'TX,Unknown cmd error\r\n': False
              }
