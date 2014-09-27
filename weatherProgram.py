@@ -85,28 +85,28 @@ def checkDataLists(data):
         if '#' in item:
             readError(data)
 
-def windWrite(data):
+def windWrite(cursor, data):
     usableData=parseNormalString(data)
     checkDataLists(usableData)
     sql="INSERT INTO WindData(DirecMin, DirecAvg, DirecMax, Speed, Gust, Lull) VALUES ('%s', '%s','%s', '%s','%s', '%s')" %(usableData[0], usableData[1], usableData[2], usableData[3], usableData[4], usableData[5])
     cursor.execute(sql)
     db.commit()
 
-def PTMWrite(data):
+def PTMWrite(cursor, data):
     usableData=parseNormalString(data)
     checkDataLists(usableData)
     sql="INSERT INTO PTH(Temp, Humidity, Pressure) VALUES ('%s', '%s', '%s')" %(usableData[0],usableData[1],usableData[2])
     cursor.execute(sql)
     db.commit()
 
-def precipitationWrite(data):
+def precipitationWrite(cursor, data):
     usableData=parseNormalString(data)
     checkDataLists(usableData)
     sql="INSERT INTO Precipitation(RainAcc, RainDur, RainIn, HailAcc, HailDur, HailIn, RainPeakIn, HailPeakIn) VALUES ('%s', '%s','%s', '%s','%s', '%s', '%s', '%s')"  %(usableData[0], usableData[1], usableData[2], usableData[3], usableData[4], usableData[5], usableData[6], usableData[7])
     cursor.execute(sql)
     db.commit()
 
-def selfCheckWrite(data):
+def selfCheckWrite(cursor, data):
     data=data[4:]
     listData=data.split(',')
     index=0
@@ -203,13 +203,13 @@ def start(weatherStation, cursor):
             index=line.find('R')
             dataType='0'+line[index:(index+2)]
             if dataType=="0R1":
-                windWrite(line)
+                windWrite(cursor, line)
             elif dataType=="0R2":
-                PTMWrite(line)
+                PTMWrite(cursor, line)
             elif dataType=="0R3":
-                precipitationWrite(line)
+                precipitationWrite(cursor, line)
             elif dataType=="0R5":
-                selfCheckWrite(line)
+                selfCheckWrite(cursor, line)
             else:
                 plog.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
                 return
