@@ -8,9 +8,10 @@ class DataInserter:
         self.dataFilter = dataFilter
 
     def insert(self, data):
-        data=parseNormalString(data)
         if self.dataFilter:
             data = self.dataFilter(data)
+        else:
+            data = parseNormalString(data)
         checkDataLists(data)
         self.table.insert(self.cursor, data)
 

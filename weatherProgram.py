@@ -108,7 +108,7 @@ def precipitationWrite(cursor, data):
     cursor.execute(sql)
     db.commit()
 
-def selfCheckWrite(cursor, data):
+def selfCheckParser(data):
     data=data[4:]
     listData=data.split(',')
     index=0
@@ -122,6 +122,9 @@ def selfCheckWrite(cursor, data):
     for char in dataList[0]:
         if char=='R':
             dataList=dataList[1:]
+    return dataList
+
+def selfCheckWrite(cursor, data):
     checkDataLists(dataList)
     sql="INSERT INTO SelfCheck(HeatingTemp, HeatingV, SupplyV, RefV) VALUES ('%s', '%s','%s', '%s')" %(dataList[0], dataList[1], dataList[2], dataList[3])
     cursor.execute(sql)
@@ -209,7 +212,7 @@ def start(weatherStation, cursor):
     inserters = { 'wind': DataInserter(DBTable("WindData", ["DirecMin", "DirecAvg", "DirecMax", "Speed", "Gust", "Lull"]), cursor),
                'ptm': DataInserter(DBTable("PTH", ["Temp", "Humidity", "Pressure"]), cursor),
                'precipitation': DataInserter(DBTable("Precipitation", ["RainAcc", "RainDur", "RainIn", "HailAcc", "HailDur", "HailIn", "RainPeakIn", "HailPeakIn"]), cursor),
-               'selfcheck': DataInserter(DBTable("SelfCheck", ["HeatingTemp", "HeatingV", "SupplyV", "RefV"]), cursor, selfCheckDataFilter)
+                  'selfcheck': DataInserter(DBTable("SelfCheck", ["HeatingTemp", "HeatingV", "SupplyV", "RefV"]), cursor, selfCheckParser)
            }
 
     startTime=time.time()+30
