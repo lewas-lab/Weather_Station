@@ -59,21 +59,30 @@ def selfCheckParser(data):
 def readError(line):
     log.write('Read error in line: '+line+'\n')
     log.write('At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
+    
+dispatch = { 'TX,Rain reset\r\n': True,
+             'TX,Sync/address error\r\n': False,
+             'TX,Unknown cmd error\r\n': False
+}
 
-def resetRain():
-    weatherStation.write('0XZRU\r\n')
+reset_codes = { 'rain': '0XZRU',
+                'intensity': '0XZRI'
+            }
+
+def reset(code):
+    try:
+        weatherStation.write( reset_codes[code] + '\r\n')
+    except KeyError:
+        sys.stderr.write("{0}: unknown reset command\n")
+        sys.exit(-1)
+
     lineNum=0
     lastReads=[]
 
-    dispatch = { 'TX,Rain reset\r\n': True,
-                 'TX,Sync/address error\r\n': False,
-                 'TX,Unknown cmd error\r\n': False
-             }
-
     for line in weatherStation: ## This loop can be cleaned up more but I need to see the output of the sensor to have a better idea of what needs to happen
         if lineNum==2:
-            for itme in lastReads:
-                log.write("Responsen from bad rain reset: "+item+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
+            for item in lastReads:
+                log.write("Response from bad " + code + " reset: "+item+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
             return False
         else:
             index=line.find('T')
@@ -81,44 +90,19 @@ def resetRain():
     
             try:
                 if not dispatch[line]:
-                    log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
+                    log.write("Response from bad " + code + " reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
                     return False
                 return True
             except KeyError:
                 lastReads.append(line)
                 lineNum=lineNum+1
 
-
-def resetIntensity():
-    weatherStation.write('0XZRI\r\n')
-    lineNum=0
-    lastReads=[]
-    for line in weatherStation:
-        if lineNum==2:
-            for itme in lastReads:
-                log.write("Responsen from bad rain reset: "+item+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
-            return False
-        else:
-            index=line.find('T')
-            line=line[index:]
-            if line=='TX,Inty reset\r\n':
-                return True
-            elif line=='TX,Sync/address error\r\n':
-                log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
-                return False
-            elif line=='TX,Unknown cmd error\r\n':
-                log.write("Responsen from bad rain reset: "+line+" At: "+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
-                return False
-            else:
-                lastReads.append(line)
-                lineNum=lineNum+1
-
 def precipitatonReset(Time):
     if Time<=time.time():
-        if not resetRain():
+        if not reset('rain'):
             log.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
             return -1
-        if not resetIntensity():
+        if not reset('intensity'):
             log.write('Intensity Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
             return -1
         return Time+30
