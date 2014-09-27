@@ -14,6 +14,7 @@ import MySQLdb
 import time
 from time import gmtime, strftime
 
+import data_store
 import data_inserter
 import dbtable
 
@@ -35,7 +36,7 @@ def message_response(metric):
     try:
         weatherStation.write(read_codes[metric] + "\r\n")
     except KeyError:
-        throw RunTimeError("{0}: unknown command")
+        raise RunTimeError("{0}: unknown command".format(metric))
     else:
         return weatherStation.readline() ## or read multiple lines, need logic for that
 
@@ -153,11 +154,5 @@ with open("crash_log.log", 'a', buffering=1) as log:
     weatherStation.baudrate=19200
     weatherStation.timeout=12000
 
-    ## internal locoal database connection settings.
-    db=MySQLdb.connect("localhost", "root", "mysql", "LEWAS")
-    cursor=db.cursor()
-
-    try:
+    with data_store("localhost", "root", "mysql", "LEWAS") as cursor:
         start(weatherStation, cursor)
-    finally:
-        db.close()
