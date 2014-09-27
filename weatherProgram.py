@@ -14,6 +14,8 @@ import MySQLdb
 import time
 from time import gmtime, strftime
 
+import data_inserter
+import dbtable
 
 ##########
 # Functions for termial use
@@ -198,11 +200,17 @@ def precipitatonReset(Time):
 def start(weatherStation, cursor):
 
     dispatch = {
-        "0R1": windWrite,
-        "0R2": PTMWrite,
-        "0R3": precipitationWrite,
-        "0R5": selfCheckWrite
+        "0R1": 'wind',
+        "0R2": 'ptm',
+        "0R3": 'precipitation',
+        "0R5": 'selfcheck'
     }
+
+    inserters = { 'wind': DataInserter(DBTable("WindData", ["DirecMin", "DirecAvg", "DirecMax", "Speed", "Gust", "Lull"]), cursor),
+               'ptm': DataInserter(DBTable("PTH", ["Temp", "Humidity", "Pressure"]), cursor),
+               'precipitation': DataInserter(DBTable("Precipitation", ["RainAcc", "RainDur", "RainIn", "HailAcc", "HailDur", "HailIn", "RainPeakIn", "HailPeakIn"]), cursor),
+               'selfcheck': DataInserter(DBTable("SelfCheck", ["HeatingTemp", "HeatingV", "SupplyV", "RefV"]), cursor, selfCheckDataFilter)
+           }
 
     startTime=time.time()+30
     stopTime=time.time()+120
@@ -211,7 +219,7 @@ def start(weatherStation, cursor):
             index=line.find('R')
             dataType='0'+line[index:(index+2)]
             try:
-                dispatch[dataType](cursor, line)
+                inserters[dispatch[dataType]].insert(cursor, line)
             except KeyError:
                 plog.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
                 return
