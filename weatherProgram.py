@@ -128,8 +128,6 @@ def selfCheckWrite(data):
 def readError(line):
     log.write('Read error in line: '+line+'\n')
     log.write('At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
-    db.close()
-    sys.exit()
 
 def resetRain():
     weatherStation.write('0XZRU\r\n')
@@ -184,12 +182,10 @@ def precipitatonReset(Time):
     if Time<=time.time():
         if not resetRain():
             log.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
-            db.close()
-            sys.exit()
+            return -1
         if not resetIntensity():
             log.write('Intensity Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
-            db.close()
-            sys.exit()
+            return -1
         return Time+30
     else:
         return Time
@@ -212,11 +208,9 @@ def start(weatherStation, cursor):
                 selfCheckWrite(line)
             else:
                 plog.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
-                db.close()
-                sys.exit()
+                return
         else:
-            db.close()
-            sys.exit()
+            return
         startTime=precipitatonReset(startTime)
 
 ###########
@@ -236,4 +230,7 @@ with open("crash_log.log", 'a', buffering=1) as log:
     db=MySQLdb.connect("localhost", "root", "mysql", "LEWAS")
     cursor=db.cursor()
 
-    start(weatherStation, cursor)
+    try:
+        start(weatherStation, cursor)
+    finally:
+        db.close()
