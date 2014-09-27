@@ -220,6 +220,7 @@ def start(weatherStation, cursor):
             dataType='0'+line[index:(index+2)]
             try:
                 inserters[dispatch[dataType]].insert(cursor, line)
+                db.commit()
             except KeyError:
                 plog.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
                 return
