@@ -66,48 +66,6 @@ def checkSelfCheck():
     weatherStation.write('0SU\r\n')
     print(weatherStation.readline())
 
-def parseNormalString(data):
-    data=data[4:]
-    listData=data.split(',')
-    index=0
-    dataList=[]
-    for item in listData:
-        index=index+1
-        if index!=len(listData):
-            dataList.append(item[3:-1])
-        else:
-            dataList.append(item[3:-3])
-    for char in dataList[0]:
-        if char=='R':
-            dataList=dataList[1:]
-    return dataList
-
-def checkDataLists(data):
-    for item in data:
-        if '#' in item:
-            readError(data)
-
-def windWrite(cursor, data):
-    usableData=parseNormalString(data)
-    checkDataLists(usableData)
-    sql="INSERT INTO WindData(DirecMin, DirecAvg, DirecMax, Speed, Gust, Lull) VALUES ('%s', '%s','%s', '%s','%s', '%s')" %(usableData[0], usableData[1], usableData[2], usableData[3], usableData[4], usableData[5])
-    cursor.execute(sql)
-    db.commit()
-
-def PTMWrite(cursor, data):
-    usableData=parseNormalString(data)
-    checkDataLists(usableData)
-    sql="INSERT INTO PTH(Temp, Humidity, Pressure) VALUES ('%s', '%s', '%s')" %(usableData[0],usableData[1],usableData[2])
-    cursor.execute(sql)
-    db.commit()
-
-def precipitationWrite(cursor, data):
-    usableData=parseNormalString(data)
-    checkDataLists(usableData)
-    sql="INSERT INTO Precipitation(RainAcc, RainDur, RainIn, HailAcc, HailDur, HailIn, RainPeakIn, HailPeakIn) VALUES ('%s', '%s','%s', '%s','%s', '%s', '%s', '%s')"  %(usableData[0], usableData[1], usableData[2], usableData[3], usableData[4], usableData[5], usableData[6], usableData[7])
-    cursor.execute(sql)
-    db.commit()
-
 def selfCheckParser(data):
     data=data[4:]
     listData=data.split(',')
@@ -123,12 +81,6 @@ def selfCheckParser(data):
         if char=='R':
             dataList=dataList[1:]
     return dataList
-
-def selfCheckWrite(cursor, data):
-    checkDataLists(dataList)
-    sql="INSERT INTO SelfCheck(HeatingTemp, HeatingV, SupplyV, RefV) VALUES ('%s', '%s','%s', '%s')" %(dataList[0], dataList[1], dataList[2], dataList[3])
-    cursor.execute(sql)
-    db.commit()
 
 def readError(line):
     log.write('Read error in line: '+line+'\n')
