@@ -194,23 +194,25 @@ def precipitatonReset(Time):
     else:
         return Time
 
-#
+
 def start(weatherStation, cursor):
+
+    dispatch = {
+        "0R1": windWrite,
+        "0R2": PTMWrite,
+        "0R3": precipitationWrite,
+        "0R5": selfCheckWrite
+    }
+
     startTime=time.time()+30
     stopTime=time.time()+120
     for line in weatherStation:
         if time.time()<stopTime:
             index=line.find('R')
             dataType='0'+line[index:(index+2)]
-            if dataType=="0R1":
-                windWrite(cursor, line)
-            elif dataType=="0R2":
-                PTMWrite(cursor, line)
-            elif dataType=="0R3":
-                precipitationWrite(cursor, line)
-            elif dataType=="0R5":
-                selfCheckWrite(cursor, line)
-            else:
+            try:
+                dispatch[dataType](cursor, line)
+            except KeyError:
                 plog.write('Rain Reset Failed At: '+strftime("%a, %d %b %Y %H:%M:%S", gmtime())+'\n')
                 return
         else:
