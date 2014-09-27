@@ -17,44 +17,28 @@ from time import gmtime, strftime
 import data_inserter
 import dbtable
 
+
 ##########
 # Functions for termial use
 
+read_codes = { 'read wind': '0R1',
+               'read PTH': '0R2',
+               'read precipitation': '0R3',
+               'read selfcheck': '0R5',
+               'read all': '0R0',
+               'check wind': '0WU',
+               'check PTH': '0TU',
+               'check precipitation': '0RU',
+               'check self': '0SU'
+           }
 
-read_codes = { 'wind': '0R1',
-               'PTH': '0R2',
-               'precipitation': '0R3',
-               'selfcheck': '0R5',
-               'all': '0R0'
-               }
-
-def read(metric):
+def message_response(metric):
     try:
         weatherStation.write(read_codes[metric] + "\r\n")
     except KeyError:
-        throw RunTimeError("{0}: unknown metric")
+        throw RunTimeError("{0}: unknown command")
     else:
         return weatherStation.readline() ## or read multiple lines, need logic for that
-
-# checks the settings for wind measurment
-def checkWind():
-    weatherStation.write('0WU\r\n')
-    print(weatherStation.readline())
-
-# checks the settings for pressure, temperature and humidity
-def checkPTH():
-    weatherStation.write('0TU\r\n')
-    print(weatherStation.readline())
-
-# checks the settings for precipitation
-def checkPrecipitation():
-    weatherStation.write('0RU\r\n')
-    print(weatherStation.readline())
-
-# checks the setting for the supurvisor data
-def checkSelfCheck():
-    weatherStation.write('0SU\r\n')
-    print(weatherStation.readline())
 
 def selfCheckParser(data):
     data=data[4:]
